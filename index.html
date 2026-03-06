@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦈 Presentation Checklist: The Shark's Secret</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #ffd43b;
+            --danger: #ff5252;
+            --success: #40c057;
+            --border: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-bottom: 70vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: var(--accent);
+        }
+
+        .mic-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .recording-dot {
+            width: 15px;
+            height: 15px;
+            background-color: var(--danger);
+            border-radius: 50%;
+        }
+
+        .recording-dot.pulse {
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--text-dim);
+            margin: 2rem 0 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-left: 5px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        .lang-selector {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-right: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .lang-selector:hover {
+            border-color: var(--accent);
+        }
+
+        .checklist-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            scroll-margin-top: 20px;
+        }
+
+        .checklist-item.exiting {
+            opacity: 0;
+            transform: translateX(100px);
+            margin-bottom: -100px;
+            pointer-events: none;
+        }
+
+        .checklist-item.highlight {
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 20px rgba(255, 212, 59, 0.3);
+            transform: scale(1.02);
+        }
+
+        .checklist-item.highlight .topic-text {
+            font-weight: bold;
+        }
+
+        .checkbox {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border: 2px solid var(--text-dim);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--success);
+        }
+
+        .checklist-item.processing {
+            border: 3px solid #ff922b;
+            animation: processing-pulse 1s infinite alternate;
+            background-color: rgba(255, 146, 43, 0.2) !important;
+        }
+
+        .checklist-item.matched {
+            border-left: 8px solid var(--success) !important;
+            background: rgba(64, 192, 87, 0.1) !important;
+        }
+
+        @keyframes processing-pulse {
+            from {
+                transform: scale(1.02);
+                box-shadow: 0 0 10px rgba(255, 146, 43, 0.2);
+            }
+
+            to {
+                transform: scale(1.04);
+                box-shadow: 0 0 25px rgba(255, 146, 43, 0.5);
+            }
+        }
+
+        .section-discarded {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+            margin-top: 3rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 2rem;
+        }
+
+        .topic-text {
+            font-size: 1.5rem;
+            flex: 1;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 1100;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-start {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-stop {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #495057;
+            color: white;
+        }
+
+        /* History Toggle & Badge */
+        .history-toggle {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+
+        .history-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .history-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 3px solid var(--bg-color);
+        }
+
+        /* History Panel */
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 2.5rem;
+            overflow-y: auto;
+            color: white;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .history-panel.open {
+            right: 0;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .history-category {
+            margin-top: 1.5rem;
+        }
+
+        .history-category-title {
+            color: var(--accent);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.3rem;
+        }
+
+        .history-item {
+            font-size: 1.1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.8rem;
+            border-radius: 8px;
+            color: #eee;
+            border-left: 4px solid var(--success);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .live-feedback {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-style: italic;
+            color: var(--accent);
+            min-height: 3rem;
+        }
+    </style>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        const CHECKLIST_DATA = [
+            // 1. THE HOOK
+            { id: 'h1', category: '1. THE HOOK', text: 'Hello everyone! Today, we are here to solve a terrifying problem in our daily lives.', keywords: ['hello everyone', 'solve', 'terrifying problem', 'daily lives'] },
+            { id: 'h2', category: '1. THE HOOK', text: '– Have you ever noticed how difficult it is to find a peaceful …….. in our city?', keywords: ['noticed', 'difficult', 'peaceful', 'city'] },
+            { id: 'h3', category: '1. THE HOOK', text: '– I wonder if you’ve considered how noise affects our mental health.', keywords: ['wonder', 'noise affects', 'mental health'] },
+            { id: 'h4', category: '1. THE HOOK', text: '– Noise pollution absolutely gets on people’s nerves.', keywords: ['noise pollution', 'nerves'] },
+            { id: 'h5', category: '1. THE HOOK', text: '– But…. Today, we will explain how biomimicry helps us and provides a groundbreaking solution… because… sharks have the answer.', keywords: ['biomimicry', 'groundbreaking', 'sharks have the answer'] },
+
+            // 2. THE PROBLEM
+            { id: 'p1', category: '2. THE PROBLEM', text: 'Ok… Modern cities use outdated methods.', keywords: ['modern cities', 'outdated methods'] },
+            { id: 'p2', category: '2. THE PROBLEM', text: '– Traditional walls are neither eco-friendly nor effective.', keywords: ['traditional walls', 'neither', 'nor'] },
+            { id: 'p3', category: '2. THE PROBLEM', text: '– To conclude… we all deserves a quiet home.', keywords: ['conclude', 'deserves', 'quiet home'] },
+
+            // 3. THE SOLUTION
+            { id: 's1', category: '3. THE SOLUTION', text: 'To solve this… today I will present the answer for you', keywords: ['solve', 'present the answer'] },
+            { id: 's2', category: '3. THE SOLUTION', text: 'But… I am not alone; my team—Jhinny, Laura, Valentina, and Julian—helped me develop this.', keywords: ['jhinny', 'laura', 'valentina', 'julian'] },
+            { id: 's3', category: '3. THE SOLUTION', text: '– We created \'The Shark’s Secret to Silence\'.', keywords: ['shark', 'secret to silence'] },
+            { id: 's4', category: '3. THE SOLUTION', text: '– It is a groundbreaking and performance-enhancing coating.', keywords: ['groundbreaking', 'performance-enhancing', 'coating'] },
+            { id: 's5', category: '3. THE SOLUTION', text: '– It is inspired by how sharks stay silent underwater.', keywords: ['inspired', 'sharks stay silent'] },
+            { id: 's6', category: '3. THE SOLUTION', text: '– Our design mimics these microscopic denticles of the shark….', keywords: ['design mimics', 'microscopic denticles'] },
+            { id: 's7', category: '3. THE SOLUTION', text: '• but… let me explain what a denticle is.', keywords: ['explain', 'denticle'] },
+            { id: 's8', category: '3. THE SOLUTION', text: '• Denticles are tiny, V-shaped scales on a shark’s skin.', keywords: ['v-shaped', 'scales', 'skin'] },
+            { id: 's9', category: '3. THE SOLUTION', text: '• They are like small teeth that cover their entire body.', keywords: ['small teeth', 'entire body'] },
+            { id: 's10', category: '3. THE SOLUTION', text: '• These structures are the secret to the shark\'s silent movement.', keywords: ['secret', 'silent movement'] },
+            { id: 's11', category: '3. THE SOLUTION', text: '• These scales break up turbulence in the water and….', keywords: ['break up turbulence', 'water'] },
+            { id: 's12', category: '3. THE SOLUTION', text: '• In our project, we apply this same logic to sound waves.', keywords: ['logic', 'sound waves'] },
+            { id: 's13', category: '3. THE SOLUTION', text: '– This material is both shock-absorbent and energy-efficient.', keywords: ['shock-absorbent', 'energy-efficient'] },
+
+            // 4. THE SCIENCE
+            { id: 'sc1', category: '4. THE SCIENCE', text: 'But… why say the science about of this….', keywords: ['science'] },
+            { id: 'sc2', category: '4. THE SCIENCE', text: '– Standard concrete walls reduce noise by 15 dB, while metal reduce it by 18 dB.', keywords: ['standard concrete', '15 db', 'metal', '18 db'] },
+            { id: 'sc3', category: '4. THE SCIENCE', text: '– Of the two materials, our coating reduces more noise than metal.', keywords: ['two materials', 'reduces more noise'] },
+            { id: 'sc4', category: '4. THE SCIENCE', text: '– We have different prototypes, many of which reduce noise by 22 dB.', keywords: ['prototypes', '22 db'] },
+
+            // 5. THE BUSINESS & EXPERT
+            { id: 'b1', category: '5. THE BUSINESS & EXPERT', text: '– The expert recommended that we use this in hospitals and schools.', keywords: ['expert recommended', 'hospitals', 'schools'] },
+            { id: 'b2', category: '5. THE BUSINESS & EXPERT', text: '– Our product is definitely an innovative solution for architecture.', keywords: ['innovative solution', 'architecture'] },
+            { id: 'b3', category: '5. THE BUSINESS & EXPERT', text: '– I reckon this is the future of urban wellness.', keywords: ['reckon', 'future', 'urban wellness'] },
+
+            // 6. THE CLOSING
+            { id: 'c1', category: '6. THE CLOSING', text: '– This invention gives peace to our busy cities.', keywords: ['invention', 'peace', 'busy cities'] },
+            { id: 'c2', category: '6. THE CLOSING', text: '– Sharks have the answer!', keywords: ['sharks have the answer'] },
+            { id: 'c3', category: '6. THE CLOSING', text: '– Thank you. Who wants to invest?', keywords: ['thank you', 'invest'] },
+
+            // 7. Descartadas
+            { id: 'd1', category: '7. Descartadas', text: '– Nature provides the best examples for innovation.', keywords: ['nature provides', 'innovation'] },
+            { id: 'd2', category: '7. Descartadas', text: '– So…. The more accurately we mimic nature, the better the results.', keywords: ['accurately', 'mimic nature'] },
+            { id: 'd3', category: '7. Descartadas', text: '– None of these old systems work for modern society.', keywords: ['old systems', 'modern society'] }
+        ];
+
+        const limpiarTexto = (texto) => texto.replace(/^[–•]\s*/, '').trim();
+
+        function App() {
+            const [checkedIds, setCheckedIds] = useState(new Set());
+            const [exitingIds, setExitingIds] = useState(new Set());
+            const [showHistory, setShowHistory] = useState(false);
+            const [isListening, setIsListening] = useState(false);
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [language, setLanguage] = useState('en-US');
+            const [fullTranscript, setFullTranscript] = useState(''); // Registro permanente de voz
+            const [lastDetected, setLastDetected] = useState('');
+            const recognitionRef = useRef(null);
+            const lastDetectedRef = useRef(''); // Ref para capturar el texto actual sin cierres obsoletos
+            const itemRefs = useRef({});
+
+            // Refs para evitar el "stale closure" en el evento onresult
+            const isProcessingRef = useRef(isProcessing);
+            const highlightIdRef = useRef(null);
+            const isListeningRef = useRef(isListening);
+            const resultOffsetRef = useRef(0); // Índice para ignorar resultados de frases anteriores
+            const totalResultsRef = useRef(0); // Referencia al total de resultados actuales
+
+            // Sincronizar refs con el estado
+            useEffect(() => { isProcessingRef.current = isProcessing; }, [isProcessing]);
+            useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+
+            // Spacebar shortcut
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.code === 'Space' && highlightIdRef.current && !isProcessingRef.current) {
+                        e.preventDefault();
+                        toggleId(highlightIdRef.current, true);
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [toggleId]);
+
+            // Auto-scroll effect
+            useEffect(() => {
+                if (highlightId && itemRefs.current[highlightId]) {
+                    // Usamos un pequeño retraso para permitir que las animaciones de check terminen
+                    const timer = setTimeout(() => {
+                        itemRefs.current[highlightId].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 50);
+                    return () => clearTimeout(timer);
+                }
+            }, [highlightId]);
+
+            // Find the first unchecked item to highlight
+            const highlightId = useMemo(() => {
+                const firstUnchecked = CHECKLIST_DATA.find(item => !checkedIds.has(item.id));
+                const id = firstUnchecked ? firstUnchecked.id : null;
+                highlightIdRef.current = id; // Actualizar ref inmediatamente
+                return id;
+            }, [checkedIds]);
+
+            useEffect(() => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return;
+
+                const recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = language; // Mantener Inglés para el contenido actual
+
+                recognition.onresult = (event) => {
+                    let fullTextForCurrentItem = '';
+
+                    // Calculamos el texto completo acumulado para este ítem desde el offset
+                    for (let i = resultOffsetRef.current; i < event.results.length; ++i) {
+                        const transcript = event.results[i][0].transcript;
+                        fullTextForCurrentItem += transcript;
+                    }
+
+                    totalResultsRef.current = event.results.length;
+
+                    // Actualizamos la visualización en tiempo real con el bloque limpio
+                    setLastDetected(fullTextForCurrentItem);
+                    lastDetectedRef.current = fullTextForCurrentItem; // Sincronizar el puente directo
+                };
+
+                recognition.onerror = (e) => {
+                    console.error("Speech Error:", e.error);
+                    if (e.error === 'no-speech' || e.error === 'audio-capture') {
+                        setIsListening(false);
+                    }
+                };
+
+                recognition.onend = () => {
+                    // El corazón de la solución "Blindada": Auto-reinicio inmediato
+                    if (isListeningRef.current) {
+                        setTimeout(() => {
+                            try { recognition.start(); } catch (e) { }
+                        }, 100);
+                    }
+                };
+
+                recognitionRef.current = recognition;
+
+                // Si ya estábamos escuchando, arrancamos el nuevo motor con el nuevo idioma
+                if (isListening) {
+                    try { recognition.start(); } catch (e) { }
+                }
+
+                return () => {
+                    recognition.onend = null;
+                    recognition.stop();
+                };
+            }, [language, isListening]);
+
+            // Este efecto ya no es necesario ya que el anterior maneja el ciclo de vida completo
+            // basado en [language, isListening]
+
+            const analyzeText = (text) => {
+                // Función desactivada: El sistema ya no avanza automáticamente por voz.
+                setLastDetected(text);
+            };
+
+            const toggleId = useCallback((id, forceState) => {
+                if (forceState === true || !checkedIds.has(id)) {
+                    // 1. Obtener el texto de la oración que se está completando
+                    const currentItem = CHECKLIST_DATA.find(i => i.id === id);
+                    const itemTitle = currentItem ? limpiarTexto(currentItem.text) : "Oración";
+
+                    // 2. Guardar el segmento completo: Título + Lo que se dijo
+                    // CAPTURA ATÓMICA: Guardamos el texto en una constante antes de limpiar
+                    const spokenText = lastDetectedRef.current.trim() || "-";
+                    setFullTranscript(prev => prev + `[TITLE] ${itemTitle} [TEXT] ${spokenText} [SEP] `);
+
+                    // 3. Limpiar el cuadro de detección visual inmediatamente
+                    setLastDetected('');
+                    lastDetectedRef.current = '';
+
+                    // 4. Sincronizar el offset para que la siguiente frase empiece limpia
+                    resultOffsetRef.current = totalResultsRef.current;
+
+                    setExitingIds(prev => new Set(prev).add(id));
+
+                    // Esperar a que termine la animación de deslizamiento (400ms)
+                    setTimeout(() => {
+                        setCheckedIds(prev => {
+                            const next = new Set(prev);
+                            next.add(id);
+                            return next;
+                        });
+                        setExitingIds(prev => {
+                            const next = new Set(prev);
+                            next.delete(id);
+                            return next;
+                        });
+                    }, 400);
+                } else {
+                    // Desmarcar ítem (devolverlo a la lista activa si es necesario)
+                    setCheckedIds(prev => {
+                        const next = new Set(prev);
+                        next.delete(id);
+                        return next;
+                    });
+                }
+            }, [checkedIds]);
+
+            const reset = () => {
+                setCheckedIds(new Set());
+                setExitingIds(new Set());
+                setLastDetected('');
+                lastDetectedRef.current = '';
+                setFullTranscript('');
+                resultOffsetRef.current = 0;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            // Filtrar ítems activos y categorías para la vista principal
+            const activeItems = CHECKLIST_DATA.filter(i => !checkedIds.has(i.id));
+            const activeCategories = [...new Set(activeItems.map(i => i.category))];
+
+            // Filtrar ítems para el panel de HISTORIAL
+            const completedItems = CHECKLIST_DATA.filter(i => checkedIds.has(i.id));
+            const historyCategories = [...new Set(completedItems.map(i => i.category))];
+
+            return (
+                <div className="container">
+                    <header>
+                        <div>
+                            <h1>🦈 THE SHARK'S SECRET</h1>
+                            <div style={{ color: 'var(--text-dim)', fontSize: '1.2rem' }}>Interactive Presentation Checklist</div>
+                        </div>
+                        <div className="mic-status">
+                            <select
+                                className="lang-selector"
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                            >
+                                <option value="en-US">🇬🇧 English</option>
+                                <option value="es-ES">🇪🇸 Español</option>
+                                <option value="es-MX">🇲🇽 Español (MX)</option>
+                            </select>
+                            <span className={`recording-dot ${isListening ? 'pulse' : ''}`}></span>
+                            {isListening ? 'LISTENING' : 'OFFLINE'}
+                        </div>
+                    </header>
+
+                    <div className="live-feedback">
+                        {isListening ? `Detecting: ${lastDetected || '...'}` : 'Voice monitoring is off.'}
+                    </div>
+
+                    {activeCategories.map(cat => (
+                        <div key={cat} className={cat.includes('Descartadas') ? 'section-discarded' : ''}>
+                            <div className="section-title">{cat}</div>
+                            {activeItems.filter(i => i.category === cat).map(item => (
+                                <div
+                                    key={item.id}
+                                    ref={el => itemRefs.current[item.id] = el}
+                                    className={`checklist-item ${exitingIds.has(item.id) ? 'exiting' : ''} ${highlightId === item.id ? 'highlight' : ''} ${isProcessing && highlightId === item.id ? 'matched' : ''}`}
+                                    onClick={() => !isProcessing && !exitingIds.has(item.id) && toggleId(item.id)}
+                                >
+                                    <div className="checkbox">{checkedIds.has(item.id) ? '✓' : ''}</div>
+                                    <div className="topic-text">{limpiarTexto(item.text)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+
+                    {/* Botón Flotante con Contador */}
+                    <div className="history-toggle" onClick={() => setShowHistory(true)}>
+                        <span style={{ fontSize: '2rem' }}>📋</span>
+                        {checkedIds.size > 0 && <div className="history-badge">{checkedIds.size}</div>}
+                    </div>
+
+                    {/* Panel de Historial Lateral */}
+                    <div className={`overlay ${showHistory ? 'visible' : ''}`} onClick={() => setShowHistory(false)}></div>
+                    <div className={`history-panel ${showHistory ? 'open' : ''}`}>
+                        <div className="history-header">
+                            <h2 style={{ margin: 0, color: 'var(--accent)' }}>HISTORIAL</h2>
+                            <button onClick={() => setShowHistory(false)} style={{ background: 'none', padding: '10px', boxShadow: 'none' }}>✕</button>
+                        </div>
+                        {historyCategories.length === 0 && <div style={{ color: '#666', textAlign: 'center', marginTop: '2rem' }}>Aún no has completado ninguna oración.</div>}
+                        {historyCategories.map(cat => (
+                            <div key={cat} className="history-category">
+                                <div className="history-category-title">{cat}</div>
+                                {completedItems.filter(i => i.category === cat).map(item => (
+                                    <div key={item.id} className="history-item">
+                                        ✓ {limpiarTexto(item.text)}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Resumen Final de Sesión (Se muestra cuando se detiene el micro y hay texto) */}
+                    {!isListening && fullTranscript && (
+                        <div id="area-revision" style={{
+                            marginTop: '4rem', padding: '2rem', background: 'rgba(255,212,59,0.1)',
+                            borderRadius: '12px', border: '1px solid var(--accent)', color: 'var(--accent)'
+                        }}>
+                            <h2 style={{ marginTop: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                REVISIÓN DE SESIÓN
+                                <button
+                                    onClick={() => setFullTranscript('')}
+                                    style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,59,59,0.2)', color: '#ff5f5f', border: '1px solid #ff5f5f', borderRadius: '4px', cursor: 'pointer' }}
+                                >
+                                    LIMPIAR LOG
+                                </button>
+                            </h2>
+                            <div style={{ color: '#eee', lineHeight: '1.8', fontSize: '1.2rem' }}>
+                                {fullTranscript.split('[SEP]').filter(s => s.trim().length > 0).map((segment, idx) => {
+                                    const titleMatch = segment.match(/\[TITLE\](.*?)(?=\[TEXT\]|$)/);
+                                    const textMatch = segment.match(/\[TEXT\](.*?)$/);
+                                    const title = titleMatch ? titleMatch[1].trim() : `Oración ${idx + 1}`;
+                                    const transcript = textMatch ? textMatch[1].trim() : "-";
+
+                                    return (
+                                        <div key={idx} style={{ marginBottom: '2rem', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: '4px solid var(--accent)' }}>
+                                            <div style={{ fontSize: '1.1rem', color: 'var(--accent)', marginBottom: '0.8rem', fontWeight: 'bold', lineHeight: '1.4' }}>
+                                                {title}
+                                            </div>
+                                            <div style={{ color: '#ccc', fontStyle: transcript === "-" ? 'italic' : 'normal', opacity: transcript === "-" ? 0.5 : 1 }}>
+                                                {transcript === "-" ? "(Sin registro de voz)" : transcript}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="controls">
+                        <button className="btn-reset" onClick={reset}>RESET</button>
+                        {isListening ? (
+                            <button className="btn-stop" onClick={() => setIsListening(false)}>STOP MONITOR</button>
+                        ) : (
+                            <button className="btn-start" onClick={() => setIsListening(true)}>START MONITOR</button>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
